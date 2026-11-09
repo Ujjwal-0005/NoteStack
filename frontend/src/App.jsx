@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -34,19 +35,22 @@ function App() {
             <Navbar />
             <main className="container mx-auto px-4 py-8 flex-1 max-w-6xl">
                 <Routes>
-                    {/* Protected */}
-                    <Route path="/" element={token ? <HomePage /> : <Navigate to="/login" />} />
-                    <Route path="/note/:id" element={token ? <HomePage /> : <Navigate to="/login" />} />
-                    <Route path="/profile" element={token ? <ProfilePage /> : <Navigate to="/login" />} />
+                    {/* Guest root is landing page; logged in redirects to dashboard */}
+                    <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+
+                    {/* Protected dashboard and note routes */}
+                    <Route path="/dashboard" element={token ? <HomePage /> : <Navigate to="/login" replace />} />
+                    <Route path="/note/:id" element={token ? <HomePage /> : <Navigate to="/login" replace />} />
+                    <Route path="/profile" element={token ? <ProfilePage /> : <Navigate to="/login" replace />} />
 
                     {/* Public / Auth */}
-                    <Route path="/login" element={!token ? <LoginPage /> : <Navigate to="/" />} />
-                    <Route path="/signup" element={!token ? <SignupPage /> : <Navigate to="/" />} />
+                    <Route path="/login" element={!token ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+                    <Route path="/signup" element={!token ? <SignupPage /> : <Navigate to="/dashboard" replace />} />
                     <Route path="/feed" element={<PublicFeedPage />} />
                     <Route path="/view/:id" element={<PublicNotePage />} />
 
                     {/* Fallback */}
-                    <Route path="*" element={<Navigate to="/" />} />
+                    <Route path="*" element={<Navigate to={token ? "/dashboard" : "/"} replace />} />
                 </Routes>
             </main>
         </div>

@@ -30,7 +30,7 @@ const LoginPage = () => {
             setSubmitting(true);
             await login(email, password);
             toast.success('Welcome back!');
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             const resData = error.response?.data;
             if (resData?.errors && Array.isArray(resData.errors)) {

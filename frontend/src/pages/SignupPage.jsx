@@ -42,7 +42,7 @@ const SignupPage = () => {
             setFieldErrors({});
             await signup(name, email, password);
             toast.success('Account created successfully!');
-            navigate('/');
+            navigate('/dashboard');
         } catch (error) {
             const resData = error.response?.data;
             if (resData?.errors && Array.isArray(resData.errors)) {
