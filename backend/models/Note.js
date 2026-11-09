@@ -27,6 +27,14 @@ const NoteSchema = new mongoose.Schema({
     isPinned: {
         type: Boolean,
         default: false
+    },
+    isArchived: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true });
 

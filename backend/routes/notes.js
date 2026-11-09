@@ -9,6 +9,8 @@ const {
     createNote,
     updateNote,
     deleteNote,
+    restoreNote,
+    deletePermanent,
     getPublicFeed,
     getPublicNote
 } = require('../controllers/noteController');
@@ -29,6 +31,12 @@ router.post('/', auth, validate(noteSchema), createNote);
 
 // @route   PUT /api/notes/:id
 router.put('/:id', auth, validate(updateNoteSchema), updateNote);
+
+// @route   PUT /api/notes/:id/restore
+router.put('/:id/restore', auth, restoreNote);
+
+// @route   DELETE /api/notes/:id/permanent
+router.delete('/:id/permanent', auth, deletePermanent);
 
 // @route   DELETE /api/notes/:id
 router.delete('/:id', auth, deleteNote);

@@ -5,7 +5,11 @@ const Note = require('../models/Note');
 
 exports.getNotes = async (req, res) => {
     try {
-        const notes = await Note.find({ user: req.user.id }).sort({ isPinned: -1, updatedAt: -1 });
+        const notes = await Note.find({
+            user: req.user.id,
+            deletedAt: null,
+            isArchived: false
+        }).sort({ isPinned: -1, updatedAt: -1 });
         res.json(notes);
     } catch (err) {
         res.status(500).send('Server Error');
@@ -13,7 +17,7 @@ exports.getNotes = async (req, res) => {
 };
 
 exports.createNote = async (req, res) => {
-    const { title, content, isPublic, tags, isPinned } = req.body;
+    const { title, content, isPublic, tags, isPinned, isArchived } = req.body;
     try {
         const newNote = new Note({
             user: req.user.id,
@@ -21,7 +25,8 @@ exports.createNote = async (req, res) => {
             content,
             isPublic: isPublic || false,
             tags: tags || [],
-            isPinned: isPinned || false
+            isPinned: isPinned || false,
+            isArchived: isArchived || false
         });
         const note = await newNote.save();
         res.json(note);
@@ -31,13 +36,14 @@ exports.createNote = async (req, res) => {
 };
 
 exports.updateNote = async (req, res) => {
-    const { title, content, isPublic, tags, isPinned } = req.body;
+    const { title, content, isPublic, tags, isPinned, isArchived } = req.body;
     const noteFields = {};
     if (title !== undefined) noteFields.title = title;
     if (content !== undefined) noteFields.content = content;
     if (isPublic !== undefined) noteFields.isPublic = isPublic;
     if (tags !== undefined) noteFields.tags = tags;
     if (isPinned !== undefined) noteFields.isPinned = isPinned;
+    if (isArchived !== undefined) noteFields.isArchived = isArchived;
 
     try {
         let note = await Note.findById(req.params.id);
@@ -59,6 +65,7 @@ exports.updateNote = async (req, res) => {
     }
 };
 
+// Soft delete: moves note to trash
 exports.deleteNote = async (req, res) => {
     try {
         let note = await Note.findById(req.params.id);
@@ -69,10 +76,54 @@ exports.deleteNote = async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        await Note.findByIdAndDelete(req.params.id);
-        res.json({ msg: 'Note removed' });
+        note.deletedAt = new Date();
+        note.isPinned = false; // Unpin when moved to trash
+        await note.save();
+        res.json({ msg: 'Note moved to trash', note });
     } catch (err) {
-        // Handles Cast to ObjectId failed error from invalid ID format
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Note not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+};
+
+// Restore from trash
+exports.restoreNote = async (req, res) => {
+    try {
+        let note = await Note.findById(req.params.id);
+        if (!note) return res.status(404).json({ msg: 'Note not found' });
+
+        // Check ownership
+        if (note.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+
+        note.deletedAt = null;
+        await note.save();
+        res.json({ msg: 'Note restored', note });
+    } catch (err) {
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Note not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+};
+
+// Permanently delete note
+exports.deletePermanent = async (req, res) => {
+    try {
+        let note = await Note.findById(req.params.id);
+        if (!note) return res.status(404).json({ msg: 'Note not found' });
+
+        // Check ownership
+        if (note.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+
+        await Note.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'Note deleted permanently' });
+    } catch (err) {
         if (err.kind === 'ObjectId') {
             return res.status(404).json({ msg: 'Note not found' });
         }

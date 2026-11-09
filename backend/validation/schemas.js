@@ -72,6 +72,9 @@ const noteSchema = z.object({
     }).max(5, { message: 'At most 5 tags are allowed' }).optional().default([]),
     isPinned: z.boolean({
         invalid_type_error: 'isPinned must be a boolean'
+    }).optional().default(false),
+    isArchived: z.boolean({
+        invalid_type_error: 'isArchived must be a boolean'
     }).optional().default(false)
 });
 
@@ -100,9 +103,12 @@ const updateNoteSchema = z.object({
     }).max(5, { message: 'At most 5 tags are allowed' }).optional(),
     isPinned: z.boolean({
         invalid_type_error: 'isPinned must be a boolean'
+    }).optional(),
+    isArchived: z.boolean({
+        invalid_type_error: 'isArchived must be a boolean'
     }).optional()
-}).refine(data => data.title !== undefined || data.content !== undefined || data.isPublic !== undefined || data.tags !== undefined || data.isPinned !== undefined, {
-    message: 'At least one field (title, content, isPublic, tags, or isPinned) must be provided for update'
+}).refine(data => data.title !== undefined || data.content !== undefined || data.isPublic !== undefined || data.tags !== undefined || data.isPinned !== undefined || data.isArchived !== undefined, {
+    message: 'At least one field (title, content, isPublic, tags, isPinned, or isArchived) must be provided for update'
 });
 
 module.exports = {
