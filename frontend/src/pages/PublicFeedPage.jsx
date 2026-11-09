@@ -9,21 +9,43 @@ const API_URL = `${API_BASE}/notes/public/feed`;
 const PublicFeedPage = () => {
     const [publicNotes, setPublicNotes] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const fetchPublicFeed = async () => {
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
+    const fetchPublicFeed = async (targetPage = 1, append = false) => {
         try {
-            const res = await axios.get(API_URL);
-            setPublicNotes(res.data);
-            setLoading(false);
+            if (append) setLoadingMore(true);
+            else setLoading(true);
+
+            const res = await axios.get(API_URL, {
+                params: { page: targetPage, limit: 12 }
+            });
+            const data = res.data;
+
+            if (append) {
+                setPublicNotes(prev => [...prev, ...data.notes]);
+            } else {
+                setPublicNotes(data.notes || []);
+            }
+            setPage(data.page || 1);
+            setPages(data.pages || 1);
         } catch (error) {
             console.error("Error fetching public feed:", error);
+        } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
 
     useEffect(() => {
-        fetchPublicFeed();
+        fetchPublicFeed(1, false);
     }, []);
+
+    const handleLoadMore = () => {
+        if (page < pages && !loadingMore) {
+            fetchPublicFeed(page + 1, true);
+        }
+    };
 
     if (loading) {
         return <div className="text-center mt-10 text-xl">Loading Public Feed...</div>;
@@ -64,6 +86,19 @@ const PublicFeedPage = () => {
                     </p>
                 )}
             </div>
+
+            {page < pages && (
+                <div className="text-center pt-6">
+                    <button
+                        type="button"
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="px-6 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition disabled:opacity-50 cursor-pointer shadow-md"
+                    >
+                        {loadingMore ? 'Loading more...' : `Load More (Page ${page + 1} of ${pages})`}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
