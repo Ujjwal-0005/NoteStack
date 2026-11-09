@@ -1,3 +1,122 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Design tokens ───────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --accent: 99 102 241;   /* indigo-500 */
+    --radius: 0.75rem;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-neutral-50 text-neutral-900 antialiased;
+  }
+  .dark body {
+    @apply bg-neutral-950 text-neutral-100;
+  }
+
+  /* ─── Typography defaults ────────────────────────────────────────────── */
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+
+  /* ─── Focus ring ─────────────────────────────────────────────────────── */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-white;
+  }
+  .dark *:focus-visible {
+    @apply ring-offset-neutral-950;
+  }
+
+  /* ─── Scrollbar (subtle) ─────────────────────────────────────────────── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+  .dark * {
+    scrollbar-color: rgb(63 63 70) transparent;
+  }
+}
+
+/* ─── Reusable component classes ─────────────────────────────────────────── */
+@layer components {
+  /* Card */
+  .card {
+    @apply bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
+           bg-indigo-600 text-white hover:bg-indigo-500 active:bg-indigo-700
+           transition-colors duration-150 cursor-pointer
+           focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-500;
+  }
+
+  /* Ghost/secondary button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
+           text-neutral-700 dark:text-neutral-300
+           hover:bg-neutral-100 dark:hover:bg-neutral-800
+           transition-colors duration-150 cursor-pointer border border-neutral-200 dark:border-neutral-700
+           focus-visible:ring-2 focus-visible:ring-indigo-500;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
+           bg-red-600 text-white hover:bg-red-500 active:bg-red-700
+           transition-colors duration-150 cursor-pointer
+           focus-visible:ring-2 focus-visible:ring-red-500;
+  }
+
+  /* Text input */
+  .input {
+    @apply w-full rounded-xl border border-neutral-300 dark:border-neutral-700
+           bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100
+           placeholder:text-neutral-400 dark:placeholder:text-neutral-500
+           transition-colors
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+
+  /* Tag chip */
+  .tag-chip {
+    @apply badge bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300;
+  }
+
+  /* Skeleton pulse */
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-800;
+  }
+
+  /* Prose for markdown rendering */
+  .md-prose {
+    @apply text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed;
+  }
+  .md-prose h1 { @apply text-xl font-bold mt-3 mb-1; }
+  .md-prose h2 { @apply text-lg font-semibold mt-3 mb-1; }
+  .md-prose h3 { @apply text-base font-semibold mt-2 mb-1; }
+  .md-prose p  { @apply mb-2; }
+  .md-prose ul { @apply list-disc pl-5 mb-2 space-y-0.5; }
+  .md-prose ol { @apply list-decimal pl-5 mb-2 space-y-0.5; }
+  .md-prose li { @apply text-sm; }
+  .md-prose code { @apply font-mono text-xs bg-neutral-100 dark:bg-neutral-800 px-1 rounded; }
+  .md-prose pre  { @apply font-mono text-xs bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg mb-2 overflow-x-auto; }
+  .md-prose blockquote { @apply border-l-4 border-indigo-300 dark:border-indigo-700 pl-3 italic text-neutral-500 dark:text-neutral-400 mb-2; }
+  .md-prose strong { @apply font-semibold text-neutral-900 dark:text-neutral-100; }
+  .md-prose a { @apply text-indigo-600 dark:text-indigo-400 underline underline-offset-2; }
+  .md-prose hr { @apply border-neutral-200 dark:border-neutral-700 my-3; }
+  .md-prose table { @apply w-full text-xs mb-2 border-collapse; }
+  .md-prose th { @apply bg-neutral-100 dark:bg-neutral-800 font-semibold px-2 py-1 text-left border border-neutral-300 dark:border-neutral-700; }
+  .md-prose td { @apply px-2 py-1 border border-neutral-200 dark:border-neutral-800; }
+}
