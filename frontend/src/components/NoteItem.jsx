@@ -32,20 +32,21 @@ const ArchiveIcon = () => (
 
 /* ─── Markdown renderer (no raw HTML) ───────────────────────────────────── */
 const MdPreview = ({ content }) => (
-    <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        className="md-prose line-clamp-4"
-        components={{
-            // Disable raw HTML tags — render nothing for them
-            html: () => null,
-            // Open links in new tab safely
-            a: ({ href, children }) => (
-                <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
-            ),
-        }}
-    >
-        {content}
-    </ReactMarkdown>
+    <div className="md-prose line-clamp-4">
+        <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+                // Disable raw HTML tags — render nothing for them
+                html: () => null,
+                // Open links in new tab safely
+                a: ({ href, children }) => (
+                    <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+                ),
+            }}
+        >
+            {content}
+        </ReactMarkdown>
+    </div>
 );
 
 /* ─── Main component ─────────────────────────────────────────────────────── */

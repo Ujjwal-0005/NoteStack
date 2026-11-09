@@ -69,20 +69,21 @@ const MarkdownEditor = ({
                     className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 p-4 min-h-[140px] max-h-[400px] overflow-y-auto"
                 >
                     {value ? (
-                        <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            className="md-prose"
-                            components={{
-                                html: () => null,
-                                a: ({ href, children }) => (
-                                    <a href={href} target="_blank" rel="noopener noreferrer">
-                                        {children}
-                                    </a>
-                                ),
-                            }}
-                        >
-                            {value}
-                        </ReactMarkdown>
+                        <div className="md-prose">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                    html: () => null,
+                                    a: ({ href, children }) => (
+                                        <a href={href} target="_blank" rel="noopener noreferrer">
+                                            {children}
+                                        </a>
+                                    ),
+                                }}
+                            >
+                                {value}
+                            </ReactMarkdown>
+                        </div>
                     ) : (
                         <p className="text-sm italic text-neutral-400 dark:text-neutral-600">
                             Nothing to preview yet.

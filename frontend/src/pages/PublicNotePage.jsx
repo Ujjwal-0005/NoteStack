@@ -99,20 +99,21 @@ const PublicNotePage = () => {
                 )}
 
                 <div className="border-t border-neutral-100 dark:border-neutral-800 pt-6">
-                    <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        className="md-prose max-w-none"
-                        components={{
-                            html: () => null,
-                            a: ({ href, children }) => (
-                                <a href={href} target="_blank" rel="noopener noreferrer">
-                                    {children}
-                                </a>
-                            ),
-                        }}
-                    >
-                        {note.content}
-                    </ReactMarkdown>
+                    <div className="md-prose max-w-none">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                html: () => null,
+                                a: ({ href, children }) => (
+                                    <a href={href} target="_blank" rel="noopener noreferrer">
+                                        {children}
+                                    </a>
+                                ),
+                            }}
+                        >
+                            {note.content}
+                        </ReactMarkdown>
+                    </div>
                 </div>
             </div>
         </article>
