@@ -1,7 +1,8 @@
 // frontend/src/context/ThemeContext.jsx
-import React, { createContext, useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ThemeContext } from './ThemeContextCore';
 
-export const ThemeContext = createContext();
+export { ThemeContext };
 
 export const ThemeProvider = ({ children }) => {
     // Initialize theme based on local storage or default to 'light'

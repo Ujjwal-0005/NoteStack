@@ -1,9 +1,12 @@
 // frontend/src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { AuthContext } from './AuthContextCore';
 
-export const AuthContext = createContext();
-const API_URL = 'http://localhost:5000/api';
+export { AuthContext };
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = API_BASE;
 
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token'));
@@ -26,7 +29,6 @@ export const AuthProvider = ({ children }) => {
         }
 
         try {
-            // 🔑 FIX: The API call logic was missing from the previous snippet
             const res = await axios.get(`${API_URL}/users/profile`, {
                 headers: { 'x-auth-token': authToken }
             });
@@ -58,19 +60,15 @@ export const AuthProvider = ({ children }) => {
     }, [token, fetchUserData]); // fetchUserData is included to satisfy useCallback dependencies
 
     const login = async (email, password) => {
-        // Axios automatically uses the default headers set in useEffect, 
-        // but we explicitly pass the token after receiving it below.
         const res = await axios.post(`${API_URL}/users/login`, { email, password });
         localStorage.setItem('token', res.data.token);
         setToken(res.data.token);
-        // The token change triggers the useEffect to call fetchUserData
     };
 
     const signup = async (name, email, password) => {
         const res = await axios.post(`${API_URL}/users/register`, { name, email, password });
         localStorage.setItem('token', res.data.token);
         setToken(res.data.token);
-        // The token change triggers the useEffect to call fetchUserData
     };
 
     return (

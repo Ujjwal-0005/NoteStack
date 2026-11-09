@@ -4,7 +4,8 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import NoteItem from '../components/NoteItem';
 
-const API_URL = 'http://localhost:5000/api/notes';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = `${API_BASE}/notes`;
 
 const HomePage = () => {
     const { token } = useContext(AuthContext);
