@@ -29,14 +29,32 @@ exports.getNotes = async (req, res) => {
             query.tags = tag.trim().toLowerCase();
         }
 
-        // Search filter (text search with fallback to regex for partial words)
+        // Search filter (text search)
         if (search && typeof search === 'string' && search.trim()) {
             const cleanSearch = search.trim();
             query.$text = { $search: cleanSearch };
         }
 
-        const notes = await Note.find(query).sort({ isPinned: -1, updatedAt: -1 });
-        res.json(notes);
+        // Pagination parameters: default limit 12, max 50
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limitParam = parseInt(req.query.limit, 10) || 12;
+        const limit = Math.min(50, Math.max(1, limitParam));
+        const skip = (page - 1) * limit;
+
+        const total = await Note.countDocuments(query);
+        const pages = Math.ceil(total / limit) || 1;
+
+        const notes = await Note.find(query)
+            .sort({ isPinned: -1, updatedAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.json({
+            notes,
+            total,
+            page,
+            pages
+        });
     } catch (err) {
         console.error('Error fetching notes:', err);
         res.status(500).send('Server Error');
@@ -162,11 +180,32 @@ exports.deletePermanent = async (req, res) => {
 
 exports.getPublicFeed = async (req, res) => {
     try {
+        const query = {
+            isPublic: true,
+            deletedAt: null
+        };
+
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limitParam = parseInt(req.query.limit, 10) || 12;
+        const limit = Math.min(50, Math.max(1, limitParam));
+        const skip = (page - 1) * limit;
+
+        const total = await Note.countDocuments(query);
+        const pages = Math.ceil(total / limit) || 1;
+
         // Populate author name for display (privacy: do not expose email)
-        const publicNotes = await Note.find({ isPublic: true })
+        const publicNotes = await Note.find(query)
             .populate('user', 'name')
-            .sort({ updatedAt: -1 });
-        res.json(publicNotes);
+            .sort({ updatedAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.json({
+            notes: publicNotes,
+            total,
+            page,
+            pages
+        });
     } catch (err) {
         console.error("Error fetching public feed:", err.message);
         res.status(500).send('Server Error');
@@ -178,7 +217,7 @@ exports.getPublicNote = async (req, res) => {
         const note = await Note.findById(req.params.id)
             .populate('user', 'name'); // Populate author name only (privacy: do not expose email)
 
-        if (!note || !note.isPublic) {
+        if (!note || !note.isPublic || note.deletedAt) {
             return res.status(404).json({ msg: 'Public note not found or is private' });
         }
 
