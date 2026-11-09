@@ -19,6 +19,10 @@ const NoteSchema = new mongoose.Schema({
     isPublic: {
         type: Boolean,
         default: false // Controls public sharing
+    },
+    tags: {
+        type: [String],
+        default: []
     }
 }, { timestamps: true });
 

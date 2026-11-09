@@ -13,13 +13,14 @@ exports.getNotes = async (req, res) => {
 };
 
 exports.createNote = async (req, res) => {
-    const { title, content, isPublic } = req.body;
+    const { title, content, isPublic, tags } = req.body;
     try {
         const newNote = new Note({
             user: req.user.id,
             title,
             content,
-            isPublic: isPublic || false
+            isPublic: isPublic || false,
+            tags: tags || []
         });
         const note = await newNote.save();
         res.json(note);
@@ -29,11 +30,12 @@ exports.createNote = async (req, res) => {
 };
 
 exports.updateNote = async (req, res) => {
-    const { title, content, isPublic } = req.body;
+    const { title, content, isPublic, tags } = req.body;
     const noteFields = {};
     if (title !== undefined) noteFields.title = title;
     if (content !== undefined) noteFields.content = content;
     if (isPublic !== undefined) noteFields.isPublic = isPublic;
+    if (tags !== undefined) noteFields.tags = tags;
 
     try {
         let note = await Note.findById(req.params.id);

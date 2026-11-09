@@ -41,6 +41,14 @@ const loginSchema = z.object({
         .min(1, { message: 'Password is required' })
 });
 
+const tagSchema = z.string({
+    invalid_type_error: 'Each tag must be a string'
+})
+    .trim()
+    .toLowerCase()
+    .min(1, { message: 'Tag cannot be empty' })
+    .max(20, { message: 'Each tag must be at most 20 characters' });
+
 const noteSchema = z.object({
     title: z.string({
         required_error: 'Title is required',
@@ -58,7 +66,10 @@ const noteSchema = z.object({
         .max(20000, { message: 'Content must not exceed 20000 characters' }),
     isPublic: z.boolean({
         invalid_type_error: 'isPublic must be a boolean'
-    }).optional().default(false)
+    }).optional().default(false),
+    tags: z.array(tagSchema, {
+        invalid_type_error: 'Tags must be an array of strings'
+    }).max(5, { message: 'At most 5 tags are allowed' }).optional().default([])
 });
 
 // For update note, all fields can be passed as usual or partial, but typically the app passes title, content, isPublic
@@ -80,9 +91,12 @@ const updateNoteSchema = z.object({
         .optional(),
     isPublic: z.boolean({
         invalid_type_error: 'isPublic must be a boolean'
-    }).optional()
-}).refine(data => data.title !== undefined || data.content !== undefined || data.isPublic !== undefined, {
-    message: 'At least one field (title, content, or isPublic) must be provided for update'
+    }).optional(),
+    tags: z.array(tagSchema, {
+        invalid_type_error: 'Tags must be an array of strings'
+    }).max(5, { message: 'At most 5 tags are allowed' }).optional()
+}).refine(data => data.title !== undefined || data.content !== undefined || data.isPublic !== undefined || data.tags !== undefined, {
+    message: 'At least one field (title, content, isPublic, or tags) must be provided for update'
 });
 
 module.exports = {
