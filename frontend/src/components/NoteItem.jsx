@@ -1,6 +1,54 @@
 // frontend/src/components/NoteItem.jsx
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
+/* ─── Icons ──────────────────────────────────────────────────────────────── */
+const PinIcon = ({ filled }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+        fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"
+        strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L8.5 9H3l4.5 4.5L6 21l6-4 6 4-1.5-7.5L21 9h-5.5L12 2z" />
+    </svg>
+);
+
+const GlobeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="2" y1="12" x2="22" y2="12" />
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+);
+
+const ArchiveIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="21 8 21 21 3 21 3 8" />
+        <rect x="1" y="3" width="22" height="5" />
+        <line x1="10" y1="12" x2="14" y2="12" />
+    </svg>
+);
+
+/* ─── Markdown renderer (no raw HTML) ───────────────────────────────────── */
+const MdPreview = ({ content }) => (
+    <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        className="md-prose line-clamp-4"
+        components={{
+            // Disable raw HTML tags — render nothing for them
+            html: () => null,
+            // Open links in new tab safely
+            a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+            ),
+        }}
+    >
+        {content}
+    </ReactMarkdown>
+);
+
+/* ─── Main component ─────────────────────────────────────────────────────── */
 const NoteItem = ({
     note,
     activeTab,
@@ -9,114 +57,126 @@ const NoteItem = ({
     onPermanentDelete,
     onUpdate,
     onEdit,
-    onSelectTag
+    onSelectTag,
 }) => {
     const isTrash = activeTab === 'trash';
-    const isPublic = note.isPublic;
-    const isPinned = note.isPinned;
-    const isArchived = note.isArchived;
+    const { isPublic, isPinned, isArchived } = note;
 
-    const handleTogglePublic = () => {
-        onUpdate(note._id, { isPublic: !isPublic });
-    };
+    const handleTogglePublic  = () => onUpdate(note._id, { isPublic: !isPublic });
+    const handleTogglePin     = () => onUpdate(note._id, { isPinned: !isPinned });
+    const handleToggleArchive = () => onUpdate(note._id, { isArchived: !isArchived });
 
-    const handleTogglePin = () => {
-        onUpdate(note._id, { isPinned: !isPinned });
-    };
-
-    const handleToggleArchive = () => {
-        onUpdate(note._id, { isArchived: !isArchived });
-    };
+    const formattedDate = new Date(note.updatedAt).toLocaleDateString(undefined, {
+        month: 'short', day: 'numeric', year: 'numeric',
+    });
 
     return (
-        <div className={`p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border-t-4 ${
-            isPinned ? 'border-amber-500 ring-2 ring-amber-400/40' : isArchived ? 'border-gray-500' : 'border-blue-500'
-        } hover:shadow-xl transition duration-300 flex flex-col justify-between`}>
-            <div>
-                {/* Header row: Pin & Title & Badges */}
-                <div className="flex justify-between items-start gap-2 mb-2">
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        {isPinned && !isTrash && (
-                            <span title="Pinned Note" className="text-amber-500 text-sm">📌</span>
-                        )}
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
-                            {note.title}
-                        </h3>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        {isArchived && !isTrash && (
-                            <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-500 text-white">
-                                Archived
-                            </span>
-                        )}
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full text-white ${
-                            isPublic ? 'bg-green-500' : 'bg-yellow-500'
-                        }`}>
-                            {isPublic ? 'Public' : 'Private'}
+        <article
+            className={`card flex flex-col p-5 gap-3 transition-shadow hover:shadow-md
+                        ${isPinned && !isTrash ? 'ring-1 ring-amber-400/60 dark:ring-amber-500/40' : ''}`}
+            aria-label={`Note: ${note.title}`}
+        >
+            {/* ── Header ───────────────────────────────────────────────── */}
+            <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                    {isPinned && !isTrash && (
+                        <span className="shrink-0 text-amber-500" aria-label="Pinned">
+                            <PinIcon filled />
                         </span>
-                    </div>
+                    )}
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 truncate leading-snug">
+                        {note.title}
+                    </h3>
                 </div>
 
-                {/* Content */}
-                <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-3 whitespace-pre-wrap">
-                    {note.content}
-                </p>
-
-                {/* Tags */}
-                {note.tags && note.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                        {note.tags.map((t, idx) => (
-                            <button
-                                key={idx}
-                                type="button"
-                                onClick={() => onSelectTag && onSelectTag(t)}
-                                className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 rounded hover:underline cursor-pointer"
-                            >
-                                #{t}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                {/* Badges */}
+                <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                    {isArchived && !isTrash && (
+                        <span className="badge bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 gap-1">
+                            <ArchiveIcon /> Archived
+                        </span>
+                    )}
+                    {isPublic && (
+                        <span className="badge bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 gap-1">
+                            <GlobeIcon /> Public
+                        </span>
+                    )}
+                </div>
             </div>
 
-            <div>
-                <small className="block text-gray-500 dark:text-gray-400 mb-3 text-xs">
-                    Last updated: {new Date(note.updatedAt).toLocaleDateString()}
-                    {note.deletedAt && ` · Deleted: ${new Date(note.deletedAt).toLocaleDateString()}`}
-                </small>
+            {/* ── Content preview ──────────────────────────────────────── */}
+            <div className="flex-1">
+                <MdPreview content={note.content} />
+            </div>
 
-                {/* Actions */}
+            {/* ── Tags ─────────────────────────────────────────────────── */}
+            {note.tags && note.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1" aria-label="Tags">
+                    {note.tags.map((t, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => onSelectTag && onSelectTag(t)}
+                            className="tag-chip hover:bg-indigo-100 dark:hover:bg-indigo-800/50
+                                       transition-colors cursor-pointer text-xs"
+                            aria-label={`Filter by tag: ${t}`}
+                        >
+                            #{t}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* ── Footer: date + actions ───────────────────────────────── */}
+            <div className="border-t border-neutral-100 dark:border-neutral-800 pt-3 flex flex-col gap-2">
+                <time
+                    dateTime={note.updatedAt}
+                    className="text-xs text-neutral-400 dark:text-neutral-500"
+                >
+                    {isTrash && note.deletedAt
+                        ? `Deleted ${new Date(note.deletedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`
+                        : `Updated ${formattedDate}`}
+                </time>
+
                 {isTrash ? (
+                    /* Trash actions */
                     <div className="flex gap-2">
                         <button
                             type="button"
                             onClick={() => onRestore(note._id)}
-                            className="flex-1 bg-emerald-600 text-white py-1.5 text-sm rounded hover:bg-emerald-700 transition font-medium"
+                            className="flex-1 btn-ghost text-xs py-1.5 text-emerald-700 dark:text-emerald-400
+                                       border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
+                            aria-label={`Restore note: ${note.title}`}
                         >
                             ↺ Restore
                         </button>
                         <button
                             type="button"
                             onClick={() => onPermanentDelete(note._id)}
-                            className="flex-1 bg-red-600 text-white py-1.5 text-sm rounded hover:bg-red-700 transition font-medium"
+                            className="flex-1 btn-danger text-xs py-1.5"
+                            aria-label={`Permanently delete note: ${note.title}`}
                         >
-                            Delete Forever
+                            Delete forever
                         </button>
                     </div>
                 ) : (
-                    <div className="space-y-2">
+                    /* Normal actions */
+                    <div className="flex flex-col gap-1.5">
                         <div className="flex gap-2">
                             <button
                                 type="button"
                                 onClick={() => onEdit(note)}
-                                className="flex-1 bg-blue-500 text-white py-1 text-sm rounded hover:bg-blue-600 transition"
+                                className="flex-1 btn-primary text-xs py-1.5"
+                                aria-label={`Edit note: ${note.title}`}
                             >
                                 Edit
                             </button>
                             <button
                                 type="button"
                                 onClick={() => onDelete(note._id)}
-                                className="flex-1 bg-red-500 text-white py-1 text-sm rounded hover:bg-red-600 transition"
+                                className="flex-1 btn-ghost text-xs py-1.5 text-red-600 dark:text-red-400
+                                           border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                aria-label={`Move note to trash: ${note.title}`}
                             >
                                 Trash
                             </button>
@@ -125,29 +185,35 @@ const NoteItem = ({
                             <button
                                 type="button"
                                 onClick={handleTogglePin}
-                                title={isPinned ? 'Unpin note' : 'Pin to top'}
-                                className={`flex-1 py-1 text-xs rounded transition font-medium ${
+                                className={`flex-1 btn-ghost text-xs py-1 ${
                                     isPinned
-                                        ? 'bg-amber-600 text-white hover:bg-amber-700'
-                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+                                        : ''
                                 }`}
+                                aria-label={isPinned ? 'Unpin note' : 'Pin note to top'}
+                                aria-pressed={isPinned}
                             >
                                 {isPinned ? 'Unpin' : 'Pin'}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleToggleArchive}
-                                title={isArchived ? 'Unarchive note' : 'Archive note'}
-                                className="flex-1 py-1 text-xs rounded transition font-medium bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                                className="flex-1 btn-ghost text-xs py-1"
+                                aria-label={isArchived ? 'Unarchive note' : 'Archive note'}
+                                aria-pressed={isArchived}
                             >
                                 {isArchived ? 'Unarchive' : 'Archive'}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleTogglePublic}
-                                className={`flex-1 ${
-                                    isPublic ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'
-                                } text-white py-1 text-xs rounded transition font-medium`}
+                                className={`flex-1 btn-ghost text-xs py-1 ${
+                                    isPublic
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                                        : ''
+                                }`}
+                                aria-label={isPublic ? 'Make note private' : 'Make note public'}
+                                aria-pressed={isPublic}
                             >
                                 {isPublic ? 'Private' : 'Public'}
                             </button>
@@ -155,7 +221,7 @@ const NoteItem = ({
                     </div>
                 )}
             </div>
-        </div>
+        </article>
     );
 };
 
