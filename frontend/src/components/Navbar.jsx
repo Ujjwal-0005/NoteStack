@@ -69,6 +69,7 @@ const Navbar = () => {
     }, []);
 
     const displayName = user ? (user.name || user.email?.split('@')[0]) : '';
+    const isLanding = !token && location.pathname === '/';
 
     const navLinkClass = (path) =>
         `text-sm font-medium transition-colors ${
@@ -82,7 +83,7 @@ const Navbar = () => {
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             className="rounded-lg p-2 text-neutral-500 dark:text-neutral-400
-                       hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500"
+                       hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-pointer"
         >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
         </button>
@@ -91,20 +92,43 @@ const Navbar = () => {
     return (
         <header className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800
                            bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md">
-            <div className="container mx-auto flex h-14 items-center justify-between px-4" ref={menuRef}>
+            <div className="container mx-auto flex h-14 items-center justify-between px-4 max-w-6xl" ref={menuRef}>
                 {/* Logo */}
-                <Link
-                    to="/"
-                    className="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400 select-none"
-                >
-                    NoteStack
-                </Link>
+                <div className="flex items-center gap-6">
+                    <Link
+                        to={token ? "/dashboard" : "/"}
+                        className="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400 select-none"
+                    >
+                        NoteStack
+                    </Link>
+
+                    {/* Smooth scroll links on landing page */}
+                    {isLanding && (
+                        <nav className="hidden md:flex items-center gap-4 text-xs font-medium text-neutral-500 dark:text-neutral-400" aria-label="Section links">
+                            <a
+                                href="#features"
+                                className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                            >
+                                Features
+                            </a>
+                            <a
+                                href="#how-it-works"
+                                className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                            >
+                                How It Works
+                            </a>
+                        </nav>
+                    )}
+                </div>
 
                 {/* Desktop nav */}
                 <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
-                    <Link to="/feed" className={navLinkClass('/feed')}>Public Feed</Link>
+                    <Link to="/feed" className={navLinkClass('/feed')}>Feed</Link>
                     {token ? (
                         <>
+                            <Link to="/dashboard" className={navLinkClass('/dashboard')}>
+                                My Notes
+                            </Link>
                             <Link to="/profile" className={navLinkClass('/profile')}>
                                 {displayName}
                             </Link>
@@ -134,7 +158,7 @@ const Navbar = () => {
                         aria-expanded={mobileOpen}
                         aria-controls="mobile-menu"
                         className="rounded-lg p-2 text-neutral-500 dark:text-neutral-400
-                                   hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                                   hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                     >
                         {mobileOpen ? <XIcon /> : <MenuIcon />}
                     </button>
@@ -149,10 +173,28 @@ const Navbar = () => {
                     className="md:hidden border-t border-neutral-200 dark:border-neutral-800
                                bg-white dark:bg-neutral-950 px-4 py-4 flex flex-col gap-3"
                 >
-                    <Link to="/feed" className={navLinkClass('/feed')}>Public Feed</Link>
+                    {isLanding && (
+                        <>
+                            <a
+                                href="#features"
+                                onClick={() => setMobileOpen(false)}
+                                className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+                            >
+                                Features
+                            </a>
+                            <a
+                                href="#how-it-works"
+                                onClick={() => setMobileOpen(false)}
+                                className="text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+                            >
+                                How It Works
+                            </a>
+                        </>
+                    )}
+                    <Link to="/feed" className={navLinkClass('/feed')}>Feed</Link>
                     {token ? (
                         <>
-                            <Link to="/" className={navLinkClass('/')}>My Notes</Link>
+                            <Link to="/dashboard" className={navLinkClass('/dashboard')}>My Notes</Link>
                             <Link to="/profile" className={navLinkClass('/profile')}>
                                 Profile · {displayName}
                             </Link>
