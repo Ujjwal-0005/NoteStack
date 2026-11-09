@@ -5,13 +5,40 @@ const Note = require('../models/Note');
 
 exports.getNotes = async (req, res) => {
     try {
-        const notes = await Note.find({
-            user: req.user.id,
-            deletedAt: null,
-            isArchived: false
-        }).sort({ isPinned: -1, updatedAt: -1 });
+        const { search, tag, view } = req.query;
+
+        // Base query for current user
+        const query = { user: req.user.id };
+
+        // Handle view filter
+        if (view === 'trash') {
+            query.deletedAt = { $ne: null };
+        } else if (view === 'archived') {
+            query.deletedAt = null;
+            query.isArchived = true;
+        } else if (view === 'all') {
+            query.deletedAt = null; // all active notes (both unarchived and archived)
+        } else {
+            // default view: active, unarchived, non-trashed notes
+            query.deletedAt = null;
+            query.isArchived = false;
+        }
+
+        // Tag filter
+        if (tag && typeof tag === 'string' && tag.trim()) {
+            query.tags = tag.trim().toLowerCase();
+        }
+
+        // Search filter (text search with fallback to regex for partial words)
+        if (search && typeof search === 'string' && search.trim()) {
+            const cleanSearch = search.trim();
+            query.$text = { $search: cleanSearch };
+        }
+
+        const notes = await Note.find(query).sort({ isPinned: -1, updatedAt: -1 });
         res.json(notes);
     } catch (err) {
+        console.error('Error fetching notes:', err);
         res.status(500).send('Server Error');
     }
 };

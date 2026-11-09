@@ -38,4 +38,12 @@ const NoteSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+// Compound text index for full-text search on title and content
+NoteSchema.index({ title: 'text', content: 'text' });
+// Compound indexes for user queries filtering by view, status, and sorted by isPinned and updatedAt
+NoteSchema.index({ user: 1, deletedAt: 1, isArchived: 1, isPinned: -1, updatedAt: -1 });
+NoteSchema.index({ user: 1, tags: 1 });
+// Index for public feed
+NoteSchema.index({ isPublic: 1, deletedAt: 1, updatedAt: -1 });
+
 module.exports = mongoose.model('Note', NoteSchema);
