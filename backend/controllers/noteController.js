@@ -30,7 +30,10 @@ exports.createNote = async (req, res) => {
 
 exports.updateNote = async (req, res) => {
     const { title, content, isPublic } = req.body;
-    const noteFields = { title, content, isPublic };
+    const noteFields = {};
+    if (title !== undefined) noteFields.title = title;
+    if (content !== undefined) noteFields.content = content;
+    if (isPublic !== undefined) noteFields.isPublic = isPublic;
 
     try {
         let note = await Note.findById(req.params.id);
