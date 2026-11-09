@@ -16,7 +16,24 @@ const noteRoutes = require('./routes/notes');
 // Security & Logging Middleware
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(cors());
+
+// CORS configuration
+const allowedOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(origin => origin.trim())
+    : ['http://localhost:5173'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or matched origins
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+
 app.use(express.json());
 // Express 5 compatible express-mongo-sanitize middleware (avoids reassigning read-only req.query getter)
 app.use((req, res, next) => {
