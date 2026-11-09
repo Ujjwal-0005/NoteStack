@@ -42,6 +42,10 @@ app.use((req, res, next) => {
     next();
 });
 
+// General API rate limiter
+const { generalLimiter } = require('./middleware/rateLimiter');
+app.use('/api', generalLimiter);
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB Connected...'))
