@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const morgan = require('morgan');
 
 const app = express();
 
@@ -10,9 +13,17 @@ const app = express();
 const authRoutes = require('./routes/auth');
 const noteRoutes = require('./routes/notes');
 
-// Middleware
+// Security & Logging Middleware
+app.use(helmet());
+app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
+// Express 5 compatible express-mongo-sanitize middleware (avoids reassigning read-only req.query getter)
+app.use((req, res, next) => {
+    if (req.body) mongoSanitize.sanitize(req.body);
+    if (req.params) mongoSanitize.sanitize(req.params);
+    next();
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -27,4 +38,3 @@ app.use('/api/notes', noteRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
