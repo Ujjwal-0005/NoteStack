@@ -57,5 +57,10 @@ app.use('/api/users', authRoutes);
 // /api/notes handles all note CRUD and public feed
 app.use('/api/notes', noteRoutes);
 
+// Central Error & 404 Handlers
+const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
