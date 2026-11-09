@@ -15,7 +15,7 @@ NoteStack is a full-stack note-taking and sharing web application built with the
 ## Tech Stack
 
 - **Frontend**: React 19, Vite, Tailwind CSS, React Router v7, Axios
-- **Backend**: Node.js, Express 5, Mongoose 8, JWT, bcryptjs, dotenv, cors
+- **Backend**: Node.js, Express 5, Mongoose 8, JWT, bcryptjs, Zod, express-mongo-sanitize, helmet, morgan, express-rate-limit, cors, dotenv
 - **Database**: MongoDB (Atlas or local)
 
 ---
@@ -76,6 +76,7 @@ notes-app/
    - `MONGO_URI`: Your MongoDB connection string (e.g., `mongodb+srv://<user>:<password>@cluster0.example.mongodb.net/NoteStack?retryWrites=true&w=majority`)
    - `PORT`: Port for the API server (default: `5000`)
    - `JWT_SECRET`: Secret key used for signing JWT tokens
+   - `CLIENT_URL`: Allowed client origin(s) for CORS, comma-separated (default: `http://localhost:5173`)
 
 4. Start the backend:
    - For production / standard run:
