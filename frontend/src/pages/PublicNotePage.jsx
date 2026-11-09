@@ -40,7 +40,7 @@ const PublicNotePage = () => {
         return <div className="text-center mt-20 text-2xl text-gray-500">Note data could not be loaded.</div>;
     }
 
-    const authorName = note.user ? (note.user.name || note.user.email) : 'Unknown User';
+    const authorName = note.user?.name || 'Unknown User';
 
     return (
         <div className="max-w-3xl mx-auto mt-10 p-8 bg-white dark:bg-gray-800 rounded-xl shadow-2xl">

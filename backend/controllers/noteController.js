@@ -77,9 +77,9 @@ exports.deleteNote = async (req, res) => {
 
 exports.getPublicFeed = async (req, res) => {
     try {
-        // Populate user name/email for display
+        // Populate author name for display (privacy: do not expose email)
         const publicNotes = await Note.find({ isPublic: true })
-            .populate('user', 'name email')
+            .populate('user', 'name')
             .sort({ updatedAt: -1 });
         res.json(publicNotes);
     } catch (err) {
@@ -91,7 +91,7 @@ exports.getPublicFeed = async (req, res) => {
 exports.getPublicNote = async (req, res) => {
     try {
         const note = await Note.findById(req.params.id)
-            .populate('user', 'name email'); // Populate author details
+            .populate('user', 'name'); // Populate author name only (privacy: do not expose email)
 
         if (!note || !note.isPublic) {
             return res.status(404).json({ msg: 'Public note not found or is private' });

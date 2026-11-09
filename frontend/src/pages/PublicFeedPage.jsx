@@ -43,7 +43,7 @@ const PublicFeedPage = () => {
                             <p className="text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
                                 Author:
                                 <span className="font-semibold text-purple-600 dark:text-purple-400 ml-1">
-                                    {note.user ? (note.user.name || note.user.email) : 'Unknown User'}
+                                    {note.user?.name || 'Unknown User'}
                                 </span>
                             </p>
 
