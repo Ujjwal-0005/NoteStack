@@ -69,7 +69,10 @@ const noteSchema = z.object({
     }).optional().default(false),
     tags: z.array(tagSchema, {
         invalid_type_error: 'Tags must be an array of strings'
-    }).max(5, { message: 'At most 5 tags are allowed' }).optional().default([])
+    }).max(5, { message: 'At most 5 tags are allowed' }).optional().default([]),
+    isPinned: z.boolean({
+        invalid_type_error: 'isPinned must be a boolean'
+    }).optional().default(false)
 });
 
 // For update note, all fields can be passed as usual or partial, but typically the app passes title, content, isPublic
@@ -94,9 +97,12 @@ const updateNoteSchema = z.object({
     }).optional(),
     tags: z.array(tagSchema, {
         invalid_type_error: 'Tags must be an array of strings'
-    }).max(5, { message: 'At most 5 tags are allowed' }).optional()
-}).refine(data => data.title !== undefined || data.content !== undefined || data.isPublic !== undefined || data.tags !== undefined, {
-    message: 'At least one field (title, content, isPublic, or tags) must be provided for update'
+    }).max(5, { message: 'At most 5 tags are allowed' }).optional(),
+    isPinned: z.boolean({
+        invalid_type_error: 'isPinned must be a boolean'
+    }).optional()
+}).refine(data => data.title !== undefined || data.content !== undefined || data.isPublic !== undefined || data.tags !== undefined || data.isPinned !== undefined, {
+    message: 'At least one field (title, content, isPublic, tags, or isPinned) must be provided for update'
 });
 
 module.exports = {

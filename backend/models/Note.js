@@ -23,6 +23,10 @@ const NoteSchema = new mongoose.Schema({
     tags: {
         type: [String],
         default: []
+    },
+    isPinned: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

@@ -5,7 +5,7 @@ const Note = require('../models/Note');
 
 exports.getNotes = async (req, res) => {
     try {
-        const notes = await Note.find({ user: req.user.id }).sort({ updatedAt: -1 });
+        const notes = await Note.find({ user: req.user.id }).sort({ isPinned: -1, updatedAt: -1 });
         res.json(notes);
     } catch (err) {
         res.status(500).send('Server Error');
@@ -13,14 +13,15 @@ exports.getNotes = async (req, res) => {
 };
 
 exports.createNote = async (req, res) => {
-    const { title, content, isPublic, tags } = req.body;
+    const { title, content, isPublic, tags, isPinned } = req.body;
     try {
         const newNote = new Note({
             user: req.user.id,
             title,
             content,
             isPublic: isPublic || false,
-            tags: tags || []
+            tags: tags || [],
+            isPinned: isPinned || false
         });
         const note = await newNote.save();
         res.json(note);
@@ -30,12 +31,13 @@ exports.createNote = async (req, res) => {
 };
 
 exports.updateNote = async (req, res) => {
-    const { title, content, isPublic, tags } = req.body;
+    const { title, content, isPublic, tags, isPinned } = req.body;
     const noteFields = {};
     if (title !== undefined) noteFields.title = title;
     if (content !== undefined) noteFields.content = content;
     if (isPublic !== undefined) noteFields.isPublic = isPublic;
     if (tags !== undefined) noteFields.tags = tags;
+    if (isPinned !== undefined) noteFields.isPinned = isPinned;
 
     try {
         let note = await Note.findById(req.params.id);
